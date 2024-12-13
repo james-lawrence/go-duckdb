@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"time"
 	"unsafe"
+
+	"github.com/marcboeker/go-duckdb/duckdbtypes"
 )
 
 // secondsPerDay to calculate the days since 1970-01-01.
@@ -61,7 +63,7 @@ func setNumeric[S any, T numericType](vec *vector, rowIdx C.idx_t, val S) error 
 		fv = T(v)
 	case float64:
 		fv = T(v)
-	case Decimal:
+	case duckdbtypes.Decimal:
 		if v.Value == nil {
 			return castError(reflect.TypeOf(val).String(), reflect.TypeOf(fv).String())
 		}
@@ -167,9 +169,9 @@ func setTime[S any](vec *vector, rowIdx C.idx_t, val S) error {
 }
 
 func setInterval[S any](vec *vector, rowIdx C.idx_t, val S) error {
-	var interval Interval
+	var interval duckdbtypes.Interval
 	switch v := any(val).(type) {
-	case Interval:
+	case duckdbtypes.Interval:
 		interval = v
 	default:
 		return castError(reflect.TypeOf(val).String(), reflect.TypeOf(interval).String())
@@ -225,7 +227,7 @@ func setHugeint[S any](vec *vector, rowIdx C.idx_t, val S) error {
 		if fv, err = hugeIntFromNative(v); err != nil {
 			return err
 		}
-	case Decimal:
+	case duckdbtypes.Decimal:
 		if v.Value == nil {
 			return castError(reflect.TypeOf(val).String(), reflect.TypeOf(fv).String())
 		}
@@ -446,17 +448,17 @@ func setSliceChildren(vec *vector, s []any, offset C.idx_t) error {
 }
 
 func setUUID[S any](vec *vector, rowIdx C.idx_t, val S) error {
-	var uuid UUID
+	var uuid duckdbtypes.UUID
 	switch v := any(val).(type) {
-	case UUID:
+	case duckdbtypes.UUID:
 		uuid = v
-	case *UUID:
+	case *duckdbtypes.UUID:
 		uuid = *v
 	case []uint8:
-		if len(v) != uuid_length {
+		if len(v) != uuid.ByteLength() {
 			return castError(reflect.TypeOf(val).String(), reflect.TypeOf(uuid).String())
 		}
-		for i := 0; i < uuid_length; i++ {
+		for i := 0; i < uuid.ByteLength(); i++ {
 			uuid[i] = v[i]
 		}
 	default:

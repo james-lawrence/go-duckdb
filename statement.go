@@ -13,6 +13,8 @@ import (
 	"math/big"
 	"time"
 	"unsafe"
+
+	"github.com/marcboeker/go-duckdb/duckdbtypes"
 )
 
 type StmtType C.duckdb_statement_type
@@ -240,7 +242,7 @@ func (s *Stmt) bind(args []driver.NamedValue) error {
 			if rv := C.duckdb_bind_timestamp(*s.stmt, C.idx_t(i+1), val); rv == C.DuckDBError {
 				return errCouldNotBind
 			}
-		case Interval:
+		case duckdbtypes.Interval:
 			val := C.duckdb_interval{
 				months: C.int32_t(v.Months),
 				days:   C.int32_t(v.Days),
