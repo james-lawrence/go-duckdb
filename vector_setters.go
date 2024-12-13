@@ -14,6 +14,7 @@ import (
 	"unsafe"
 
 	"github.com/marcboeker/go-duckdb/duckdbtypes"
+	"github.com/marcboeker/go-duckdb/internal/uuidx"
 )
 
 // secondsPerDay to calculate the days since 1970-01-01.
@@ -377,9 +378,9 @@ func setStruct[S any](vec *vector, rowIdx C.idx_t, val S) error {
 }
 
 func setMap[S any](vec *vector, rowIdx C.idx_t, val S) error {
-	var m Map
+	var m duckdbtypes.Map
 	switch v := any(val).(type) {
-	case Map:
+	case duckdbtypes.Map:
 		m = v
 	default:
 		return castError(reflect.TypeOf(val).String(), reflect.TypeOf(m).String())
@@ -455,10 +456,10 @@ func setUUID[S any](vec *vector, rowIdx C.idx_t, val S) error {
 	case *duckdbtypes.UUID:
 		uuid = *v
 	case []uint8:
-		if len(v) != uuid.ByteLength() {
+		if len(v) != uuidx.ByteLength {
 			return castError(reflect.TypeOf(val).String(), reflect.TypeOf(uuid).String())
 		}
-		for i := 0; i < uuid.ByteLength(); i++ {
+		for i := 0; i < uuidx.ByteLength; i++ {
 			uuid[i] = v[i]
 		}
 	default:

@@ -11,6 +11,7 @@ import (
 	"math/big"
 
 	"github.com/marcboeker/go-duckdb/duckdbtypes"
+	"github.com/marcboeker/go-duckdb/internal/uuidx"
 )
 
 type numericType interface {
@@ -19,9 +20,8 @@ type numericType interface {
 
 // duckdb_hugeint is composed of (lower, upper) components.
 // The value is computed as: upper * 2^64 + lower
-
 func hugeIntToUUID(hi C.duckdb_hugeint) []byte {
-	var uuid [duckdbtypes.UUIDLength]byte
+	var uuid [uuidx.ByteLength]byte
 	// We need to flip the sign bit of the signed hugeint to transform it to UUID bytes
 	binary.BigEndian.PutUint64(uuid[:8], uint64(hi.upper)^1<<63)
 	binary.BigEndian.PutUint64(uuid[8:], uint64(hi.lower))
@@ -61,18 +61,6 @@ func hugeIntFromNative(i *big.Int) (C.duckdb_hugeint, error) {
 		lower: C.uint64_t(r.Uint64()),
 		upper: C.int64_t(q.Int64()),
 	}, nil
-}
-
-type Map map[any]any
-
-func (m *Map) Scan(v any) error {
-	data, ok := v.(Map)
-	if !ok {
-		return fmt.Errorf("invalid type `%T` for scanning `Map`, expected `Map`", data)
-	}
-
-	*m = data
-	return nil
 }
 
 func mapKeysField() string {

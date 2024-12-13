@@ -4,7 +4,6 @@ go 1.23
 
 require (
 	github.com/apache/arrow-go/v18 v18.0.0
-	github.com/google/uuid v1.6.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/stretchr/testify v1.9.0
 )
